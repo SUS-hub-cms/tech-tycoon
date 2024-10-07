@@ -1,71 +1,81 @@
-import React, { useState } from 'react';
-import { GameState, Product } from './types';
+import React, { useState, useCallback } from 'react';
+import { GameState } from './types';
 import { initialProducts } from './data/products';
 import GameMenu from './components/GameMenu';
-import CompanySetup from './components/CompanySetup';
+import CompanySetup, { CompanySetup as CompanySetupType } from './components/CompanySetup';
 import Game from './components/Game';
 
-const initialState: GameState = {
-  money: 1000,
+const getInitialState = (setup: CompanySetupType): GameState => ({
+  companyName: setup.name,
+  companyLogo: setup.logo,
+  money: setup.startBudget,
   researchPoints: 50,
-  products: initialProducts,
-  companyName: '',
-  companyLogo: '',
-};
+  products: initialProducts.map(product => {
+    if (setup.difficulty === 'Easy') {
+      return {
+        ...product,
+        moneyPerCopy: 200,
+        researchCost: product.researchCost / 2,
+        cost: product.cost / 2,
+      };
+    } else if (setup.difficulty === 'Hard') {
+      return {
+        ...product,
+        moneyPerCopy: 95,
+        researchCost: product.researchCost * 2,
+        cost: product.cost * 2,
+      };
+    }
+    return product;
+  }),
+  createdProducts: [],
+  productionQueue: [],
+  loans: [],
+  gameDate: new Date(`${setup.startYear}-01-01`),
+  difficulty: setup.difficulty,
+  isBankrupt: false,
+});
 
 function App() {
-  const [gameState, setGameState] = useState<GameState>(initialState);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [gamePhase, setGamePhase] = useState<'menu' | 'setup' | 'game'>('menu');
+  const [initialSetup, setInitialSetup] = useState<CompanySetupType | null>(null);
 
-  const startNewGame = () => {
+  const startNewGame = useCallback(() => {
     setGamePhase('setup');
-  };
+  }, []);
 
-  const setupCompany = (name: string, logo: string) => {
-    setGameState(prevState => ({
-      ...prevState,
-      companyName: name,
-      companyLogo: logo,
-    }));
+  const setupCompany = useCallback((setup: CompanySetupType) => {
+    const initialState = getInitialState(setup);
+    setGameState(initialState);
+    setInitialSetup(setup);
     setGamePhase('game');
-  };
+  }, []);
 
-  const handleResearch = (product: Product) => {
-    if (gameState.money >= product.researchCost && gameState.researchPoints >= product.researchPoints) {
-      setGameState((prevState) => ({
-        ...prevState,
-        money: prevState.money - product.researchCost,
-        researchPoints: prevState.researchPoints - product.researchPoints,
-        products: prevState.products.map((p) =>
-          p.id === product.id ? { ...p, isResearched: true } : p
-        ),
-      }));
-    } else {
-      alert('Not enough resources to research this product!');
-    }
-  };
+  const loadGame = useCallback((loadedState: GameState) => {
+    setGameState(loadedState);
+    setGamePhase('game');
+  }, []);
 
-  const handleProduce = (product: Product) => {
-    if (gameState.money >= product.cost) {
-      setGameState((prevState) => ({
-        ...prevState,
-        money: prevState.money - product.cost + product.cost * 1.5, // Sell for 50% profit
-        researchPoints: prevState.researchPoints + Math.floor(product.researchPoints / 2),
-      }));
-    } else {
-      alert('Not enough money to produce this product!');
+  const handleBankruptcy = useCallback((action: 'mainMenu' | 'retry') => {
+    if (action === 'mainMenu') {
+      setGameState(null);
+      setGamePhase('menu');
+    } else if (action === 'retry' && initialSetup) {
+      const newInitialState = getInitialState(initialSetup);
+      setGameState(newInitialState);
     }
-  };
+  }, [initialSetup]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {gamePhase === 'menu' && <GameMenu onStartNewGame={startNewGame} />}
+      {gamePhase === 'menu' && <GameMenu onStartNewGame={startNewGame} onLoadGame={loadGame} />}
       {gamePhase === 'setup' && <CompanySetup onSetupComplete={setupCompany} />}
-      {gamePhase === 'game' && (
+      {gamePhase === 'game' && gameState && (
         <Game
           gameState={gameState}
-          onResearch={handleResearch}
-          onProduce={handleProduce}
+          setGameState={setGameState}
+          onBankruptcy={handleBankruptcy}
         />
       )}
     </div>
