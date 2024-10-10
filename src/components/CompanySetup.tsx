@@ -20,22 +20,16 @@ const CompanySetup: React.FC<CompanySetupProps> = ({ onSetupComplete }) => {
   const [startYear, setStartYear] = useState(1970);
   const [startBudget, setStartBudget] = useState(5000);
   const [difficulty, setDifficulty] = useState<'Easy' | 'Standard' | 'Hard'>('Standard');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const startYears = [1970, 1980, 1990, 2010, 2020, 2030];
-  const budgets = [5000, 10000, 20000, 30000, 50000];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
-        return;
-      }
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedLogo(e.target?.result as string);
-        setSelectedLogo('uploaded');
+      reader.onloadend = () => {
+        setUploadedLogo(reader.result as string);
+        setSelectedLogo('upload');
       };
       reader.readAsDataURL(file);
     }
@@ -43,26 +37,22 @@ const CompanySetup: React.FC<CompanySetupProps> = ({ onSetupComplete }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (companyName && selectedLogo) {
-      const setup: CompanySetup = {
-        name: companyName,
-        logo: uploadedLogo || selectedLogo,
-        startYear,
-        startBudget,
-        difficulty,
-      };
-      onSetupComplete(setup);
-    } else {
-      alert('Please enter a company name and select a logo.');
-    }
+    onSetupComplete({
+      name: companyName,
+      logo: selectedLogo === 'upload' ? uploadedLogo || '' : selectedLogo,
+      startYear,
+      startBudget,
+      difficulty,
+    });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <h2 className="text-4xl font-bold mb-8">Set Up Your Company</h2>
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
-        <div>
-          <label htmlFor="companyName" className="block text-sm font-medium mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-3xl font-bold mb-6 text-center text-white">Set Up Your Company</h2>
+        
+        <div className="mb-4">
+          <label htmlFor="companyName" className="block text-sm font-medium text-gray-300 mb-1">
             Company Name
           </label>
           <input
@@ -70,91 +60,92 @@ const CompanySetup: React.FC<CompanySetupProps> = ({ onSetupComplete }) => {
             id="companyName"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 rounded-lg text-white"
+            className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white"
             required
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Company Logo</label>
-          <div className="grid grid-cols-3 gap-4">
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Company Logo
+          </label>
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
-              onClick={() => setSelectedLogo('CPU')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg ${
-                selectedLogo === 'CPU' ? 'bg-blue-500' : 'bg-gray-700'
-              } hover:bg-blue-600 transition-colors duration-200`}
+              onClick={() => setSelectedLogo('cpu')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center ${selectedLogo === 'cpu' ? 'bg-blue-500' : 'bg-gray-700'}`}
             >
-              <Cpu className="w-12 h-12 mb-2" />
-              <span>CPU</span>
+              <Cpu className="w-8 h-8 mb-2" />
+              <span className="text-sm">CPU</span>
             </button>
             <button
               type="button"
-              onClick={() => setSelectedLogo('GPU')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg ${
-                selectedLogo === 'GPU' ? 'bg-blue-500' : 'bg-gray-700'
-              } hover:bg-blue-600 transition-colors duration-200`}
+              onClick={() => setSelectedLogo('gpu')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center ${selectedLogo === 'gpu' ? 'bg-blue-500' : 'bg-gray-700'}`}
             >
-              <Monitor className="w-12 h-12 mb-2" />
-              <span>GPU</span>
+              <Monitor className="w-8 h-8 mb-2" />
+              <span className="text-sm">GPU</span>
             </button>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg ${
-                selectedLogo === 'uploaded' ? 'bg-blue-500' : 'bg-gray-700'
-              } hover:bg-blue-600 transition-colors duration-200`}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center ${selectedLogo === 'upload' ? 'bg-blue-500' : 'bg-gray-700'}`}
             >
-              {uploadedLogo ? (
-                <img src={uploadedLogo} alt="Uploaded logo" className="w-12 h-12 mb-2 object-contain" />
-              ) : (
-                <Upload className="w-12 h-12 mb-2" />
-              )}
-              <span>Upload Logo</span>
+              <Upload className="w-8 h-8 mb-2" />
+              <span className="text-sm">Upload Logo</span>
             </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleLogoUpload}
-              accept="image/*"
-              className="hidden"
-            />
           </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleLogoUpload}
+            accept="image/*"
+            className="hidden"
+          />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Start Year</label>
+            <label htmlFor="startYear" className="block text-sm font-medium text-gray-300 mb-1">
+              Start Year
+            </label>
             <select
+              id="startYear"
               value={startYear}
-              onChange={(e) => setStartYear(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-gray-800 rounded-lg text-white"
+              onChange={(e) => setStartYear(parseInt(e.target.value))}
+              className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white"
             >
-              {startYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
+              {Array.from({ length: 54 }, (_, i) => 1970 + i).map((year) => (
+                <option key={year} value={year}>{year}</option>
               ))}
             </select>
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-2">Start Budget</label>
+            <label htmlFor="startBudget" className="block text-sm font-medium text-gray-300 mb-1">
+              Start Budget
+            </label>
             <select
+              id="startBudget"
               value={startBudget}
-              onChange={(e) => setStartBudget(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-gray-800 rounded-lg text-white"
+              onChange={(e) => setStartBudget(parseInt(e.target.value))}
+              className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white"
             >
-              {budgets.map((budget) => (
-                <option key={budget} value={budget}>
-                  ${budget.toLocaleString()}
-                </option>
+              {[1000, 5000, 10000, 20000, 50000].map((budget) => (
+                <option key={budget} value={budget}>${budget.toLocaleString()}</option>
               ))}
             </select>
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-2">Difficulty</label>
+            <label htmlFor="difficulty" className="block text-sm font-medium text-gray-300 mb-1">
+              Difficulty
+            </label>
             <select
+              id="difficulty"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as 'Easy' | 'Standard' | 'Hard')}
-              className="w-full px-3 py-2 bg-gray-800 rounded-lg text-white"
+              className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white"
             >
               <option value="Easy">Easy</option>
               <option value="Standard">Standard</option>
@@ -162,9 +153,10 @@ const CompanySetup: React.FC<CompanySetupProps> = ({ onSetupComplete }) => {
             </select>
           </div>
         </div>
+
         <button
           type="submit"
-          className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-colors duration-200"
+          className="w-full bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors duration-200 text-lg font-semibold"
         >
           Start Your Company
         </button>

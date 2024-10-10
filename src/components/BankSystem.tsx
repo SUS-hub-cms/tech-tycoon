@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loan } from '../types';
 
 interface BankSystemProps {
@@ -12,6 +12,7 @@ interface BankSystemProps {
 const BankSystem: React.FC<BankSystemProps> = ({ loans, onLoanTaken, onLoanPayment, playerMoney, currentDate }) => {
   const [selectedAmount, setSelectedAmount] = useState(1000);
   const [selectedInterestRate, setSelectedInterestRate] = useState(5);
+  const [loanReminders, setLoanReminders] = useState<string[]>([]);
 
   const loanAmounts = [1000, 5000, 10000, 20000, 30000, 50000];
   const interestRates = [
@@ -19,6 +20,18 @@ const BankSystem: React.FC<BankSystemProps> = ({ loans, onLoanTaken, onLoanPayme
     { rate: 10, days: 20 },
     { rate: 15, days: 10 },
   ];
+
+  useEffect(() => {
+    const newReminders = loans.filter(loan => {
+      const daysUntilDue = Math.ceil((loan.dueDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+      return daysUntilDue <= 3 && daysUntilDue > 0;
+    }).map(loan => {
+      const daysUntilDue = Math.ceil((loan.dueDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+      return `Loan payment of $${loan.remainingAmount.toFixed(2)} due in ${daysUntilDue} day${daysUntilDue > 1 ? 's' : ''}!`;
+    });
+
+    setLoanReminders(newReminders);
+  }, [loans, currentDate]);
 
   const handleTakeLoan = () => {
     const dueDate = new Date(currentDate.getTime() + interestRates.find(r => r.rate === selectedInterestRate)!.days * 24 * 60 * 60 * 1000);
@@ -48,6 +61,16 @@ const BankSystem: React.FC<BankSystemProps> = ({ loans, onLoanTaken, onLoanPayme
 
   return (
     <div className="space-y-4">
+      {loanReminders.length > 0 && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          <p className="font-bold">Loan Payment Reminders:</p>
+          <ul className="list-disc list-inside">
+            {loanReminders.map((reminder, index) => (
+              <li key={index}>{reminder}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="mb-4">
         <label className="block mb-2">Loan Amount:</label>
         <select

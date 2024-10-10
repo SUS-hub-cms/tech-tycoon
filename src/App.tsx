@@ -1,85 +1,63 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { GameState } from './types';
 import { initialProducts } from './data/products';
 import GameMenu from './components/GameMenu';
 import CompanySetup, { CompanySetup as CompanySetupType } from './components/CompanySetup';
 import Game from './components/Game';
 
-const getInitialState = (setup: CompanySetupType): GameState => ({
-  companyName: setup.name,
-  companyLogo: setup.logo,
-  money: setup.startBudget,
-  researchPoints: 50,
-  products: initialProducts.map(product => {
-    if (setup.difficulty === 'Easy') {
-      return {
-        ...product,
-        moneyPerCopy: 200,
-        researchCost: product.researchCost / 2,
-        cost: product.cost / 2,
-      };
-    } else if (setup.difficulty === 'Hard') {
-      return {
-        ...product,
-        moneyPerCopy: 95,
-        researchCost: product.researchCost * 2,
-        cost: product.cost * 2,
-      };
-    }
-    return product;
-  }),
-  createdProducts: [],
-  productionQueue: [],
-  loans: [],
-  gameDate: new Date(`${setup.startYear}-01-01`),
-  difficulty: setup.difficulty,
-  isBankrupt: false,
-});
-
-function App() {
+const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [gamePhase, setGamePhase] = useState<'menu' | 'setup' | 'game'>('menu');
-  const [initialSetup, setInitialSetup] = useState<CompanySetupType | null>(null);
+  const [showCompanySetup, setShowCompanySetup] = useState(false);
 
-  const startNewGame = useCallback(() => {
-    setGamePhase('setup');
+  const handleStartNewGame = useCallback(() => {
+    setShowCompanySetup(true);
   }, []);
 
-  const setupCompany = useCallback((setup: CompanySetupType) => {
-    const initialState = getInitialState(setup);
+  const handleCompanySetup = useCallback((setup: CompanySetupType) => {
+    const initialState: GameState = {
+      companyName: setup.name,
+      companyLogo: setup.logo,
+      money: setup.startBudget,
+      researchPoints: 10, // Start with 10 RP
+      products: initialProducts,
+      createdProducts: [],
+      productionQueue: [],
+      loans: [],
+      gameDate: new Date(setup.startYear, 0, 1),
+      difficulty: setup.difficulty,
+      isBankrupt: false,
+    };
     setGameState(initialState);
-    setInitialSetup(setup);
-    setGamePhase('game');
+    setShowCompanySetup(false);
   }, []);
 
-  const loadGame = useCallback((loadedState: GameState) => {
+  const handleLoadGame = useCallback((loadedState: GameState) => {
     setGameState(loadedState);
-    setGamePhase('game');
   }, []);
 
   const handleBankruptcy = useCallback((action: 'mainMenu' | 'retry') => {
     if (action === 'mainMenu') {
       setGameState(null);
-      setGamePhase('menu');
-    } else if (action === 'retry' && initialSetup) {
-      const newInitialState = getInitialState(initialSetup);
-      setGameState(newInitialState);
+    } else {
+      setShowCompanySetup(true);
     }
-  }, [initialSetup]);
+  }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {gamePhase === 'menu' && <GameMenu onStartNewGame={startNewGame} onLoadGame={loadGame} />}
-      {gamePhase === 'setup' && <CompanySetup onSetupComplete={setupCompany} />}
-      {gamePhase === 'game' && gameState && (
-        <Game
-          gameState={gameState}
-          setGameState={setGameState}
-          onBankruptcy={handleBankruptcy}
-        />
-      )}
-    </div>
-  );
-}
+  if (showCompanySetup) {
+    return <CompanySetup onSetupComplete={handleCompanySetup} />;
+  }
+
+  if (gameState) {
+    return (
+      <Game
+        gameState={gameState}
+        setGameState={setGameState}
+        onBankruptcy={handleBankruptcy}
+      />
+    );
+  }
+
+  return <GameMenu onStartNewGame={handleStartNewGame} onLoadGame={handleLoadGame} />;
+};
 
 export default App;

@@ -5,10 +5,35 @@ import { Save } from 'lucide-react';
 interface SaveGameProps {
   gameState: GameState;
 }
+const formatGameState = (state: GameState): any => {
+  return {
+    companyName: state.companyName,
+    companyLogo: state.companyLogo,
+    money: state.money,
+    researchPoints: state.researchPoints,
+    products: state.products.map(product => ({
+      id: product.id,
+      name: product.name,
+      type: product.type,
+      subtype: product.subtype,
+      level: product.level,
+      specs: product.specs,
+      price: product.price,
+      isResearched: product.isResearched,
+      researchPoints: product.researchPoints,
+      researchCost: product.researchCost,
+    })),
+    gameDate: state.gameDate.toISOString(),
+    loans: state.loans,
+    createdProducts: state.createdProducts,
+    productionQueue: state.productionQueue,
+  };
+};
 
 const SaveGame: React.FC<SaveGameProps> = ({ gameState }) => {
   const handleSave = () => {
-    const saveData = JSON.stringify(gameState);
+    const formattedState = formatGameState(gameState);
+    const saveData = JSON.stringify(formattedState, null, 2);
     const blob = new Blob([saveData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -32,3 +57,5 @@ const SaveGame: React.FC<SaveGameProps> = ({ gameState }) => {
 };
 
 export default SaveGame;
+
+

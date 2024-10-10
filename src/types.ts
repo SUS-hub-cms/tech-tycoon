@@ -1,15 +1,52 @@
 import { Dispatch, SetStateAction } from 'react';
 
 export interface Product {
-  // ... (existing Product interface remains unchanged)
+  id: string;
+  name: string;
+  type: 'CPU' | 'GPU';
+  subtype: string;
+  level: 'Basic' | 'Enhanced' | 'Enhanced 2' | 'Enhanced 3';
+  cost: number;
+  researchCost: number;
+  researchPoints: number;
+  isResearched: boolean;
+  productionTime: number;
+  moneyPerCopy: number;
+  researchPointsPerCopy: number;
+  price: number;
+  specs: any;
 }
 
 export interface CreatedProduct extends Product {
-  // ... (existing CreatedProduct interface remains unchanged)
+  createdName: string;
+  copies: number;
+  specs: {
+    // CPU specs
+    cores?: number;
+    threads?: number;
+    baseFrequency?: number;
+    turboFrequency?: number;
+    powerUsage?: number;
+    caches?: number;
+    // GPU specs
+    baseClock?: number;
+    boostClock?: number;
+    memoryClock?: number;
+    memorySize?: number;
+    memoryType?: string;
+    directX?: string;
+    vulkan?: string;
+    openGL?: string;
+  };
 }
 
 export interface ProductionItem {
-  // ... (existing ProductionItem interface remains unchanged)
+  product: Product;
+  name: string;
+  copies: number;
+  progress: number;
+  totalTime: number;
+  price: number;
 }
 
 export interface Loan {
@@ -17,21 +54,26 @@ export interface Loan {
   interestRate: number;
   dueDate: Date;
   remainingAmount: number;
-  payLaterCount: number; // Add this new property
+  payLaterCount: number;
 }
 
 export interface GameState {
+  company: {
+    name: string;
+    logo: string;
+    money: number;
+    researchPoints: number;
+  };
   companyName: string;
   companyLogo: string;
   money: number;
   researchPoints: number;
-  products: Product[];
-  createdProducts: CreatedProduct[];
-  productionQueue: ProductionItem[];
-  loans: Loan[];
   gameDate: Date;
-  difficulty: 'Easy' | 'Standard' | 'Hard';
-  isBankrupt: boolean; // Add this new property
+  date: Date;
+  products: Product[];
+  loans: Loan[];
+  productionQueue: ProductionItem[];
+  createdProducts: CreatedProduct[];
 }
 
 export type GameStateDispatch = Dispatch<SetStateAction<GameState>>;

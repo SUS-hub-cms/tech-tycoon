@@ -1,17 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Product } from '../types';
 import { Cpu, Monitor } from 'lucide-react';
 
 interface ProductListProps {
   products: Product[];
   onResearch: (product: Product) => void;
-  onProduce: (product: Product, name: string, copies: number) => void;
+  onUpgrade: (product: Product) => void;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products, onResearch, onProduce }) => {
-  const [productName, setProductName] = useState('');
-  const [productCopies, setProductCopies] = useState(1);
-
+const ProductList: React.FC<ProductListProps> = ({ products, onResearch, onUpgrade }) => {
   const cpuProducts = products.filter(product => product.type === 'CPU');
   const gpuProducts = products.filter(product => product.type === 'GPU');
 
@@ -25,33 +22,12 @@ const ProductList: React.FC<ProductListProps> = ({ products, onResearch, onProdu
       <p className="text-sm text-gray-400 mb-1">Research Points: {product.researchPoints}</p>
       <p className="text-sm text-gray-400 mb-3">Production Time: {product.productionTime}s</p>
       {product.isResearched ? (
-        <>
-          <input
-            type="text"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            placeholder="Product Name"
-            className="w-full px-3 py-2 mb-2 bg-gray-700 rounded-lg text-white"
-          />
-          <input
-            type="number"
-            value={productCopies}
-            onChange={(e) => setProductCopies(Math.min(250000000, Math.max(1, parseInt(e.target.value) || 1)))}
-            min="1"
-            max="250000000"
-            className="w-full px-3 py-2 mb-2 bg-gray-700 rounded-lg text-white"
-          />
-          <button
-            onClick={() => {
-              onProduce(product, productName || product.name, productCopies);
-              setProductName('');
-              setProductCopies(1);
-            }}
-            className="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200"
-          >
-            Produce
-          </button>
-        </>
+        <button
+          onClick={() => onUpgrade(product)}
+          className="w-full bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200"
+        >
+          Upgrade
+        </button>
       ) : (
         <button
           onClick={() => onResearch(product)}

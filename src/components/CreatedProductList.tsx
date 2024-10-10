@@ -13,7 +13,7 @@ const CreatedProductList: React.FC<CreatedProductListProps> = ({ createdProducts
   const gpuProducts = createdProducts.filter(product => product.type === 'GPU');
 
   const renderProductCard = (product: CreatedProduct) => (
-    <div key={product.id} className="bg-gray-800 p-4 rounded-lg shadow-lg">
+    <div key={product.id} className="bg-gray-700 p-4 rounded-lg shadow-lg">
       <h3 className="text-lg font-semibold mb-2">{product.createdName}</h3>
       <p className="text-sm text-gray-400 mb-1">Type: {product.type}</p>
       <p className="text-sm text-gray-400 mb-1">Subtype: {product.subtype}</p>
@@ -52,8 +52,7 @@ const CreatedProductList: React.FC<CreatedProductListProps> = ({ createdProducts
   );
 
   return (
-    <div className="mt-8">
-      <h2 className="text-3xl font-bold mb-6">Created Products</h2>
+    <div className="space-y-8">
       {renderCategory("CPUs", <Cpu className="w-6 h-6 text-blue-500" />, cpuProducts)}
       {renderCategory("GPUs", <Monitor className="w-6 h-6 text-green-500" />, gpuProducts)}
     </div>
