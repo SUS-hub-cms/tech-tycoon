@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Add your production domain to origins
+    allow read, write: if request.auth != null && 
+      request.origin.matches('https://.*\\.vercel\\.app') || 
+      request.origin.matches('http://localhost:.*');
+    
+    // User profiles with size validation for avatar
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+                   request.auth.uid == userId && 
+                   (!request.resource.data.photoURL || 
+                    request.resource.data.photoURL.size() < 700000); // ~500KB in base64
+    }
+    
+    // Game saves
+    match /saves/{saveId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Game states
+    match /gameStates/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Achievements
+    match /achievements/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Statistics
+    match /statistics/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+} 
