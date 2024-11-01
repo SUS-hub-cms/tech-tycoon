@@ -1,0 +1,68 @@
+/* Base styles */
+:root {
+    --primary: #3b82f6;
+    --background: #1f2937;
+    --text: #f3f4f6;
+    --error: #ef4444;
+    --success: #22c55e;
+}
+
+/* Layout */
+#game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Header */
+header {
+    background: var(--background);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stats {
+    display: flex;
+    gap: 2rem;
+    color: var(--text);
+}
+
+/* Controls */
+.main-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    animation: slideIn 0.3s ease-out;
+}
+
+.toast-success {
+    background: var(--success);
+}
+
+.toast-error {
+    background: var(--error);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Add more styles as needed... */ 
