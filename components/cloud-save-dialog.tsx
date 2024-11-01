@@ -10,20 +10,12 @@ import { ApiService } from "@/services/api-service"
 import { useToast } from "@/hooks/use-toast"
 import { Timestamp } from 'firebase/firestore'
 
-type CloudSave = {
-  id: string
-  timestamp: Date
-  name?: string
-  saveData: string
-  userId: string
-}
-
-type FirebaseResponse = {
-  id: string
-  timestamp: Timestamp
-  name?: string
-  saveData: string
-  userId: string
+interface SaveData {
+  id: string;
+  name: string;
+  timestamp: Date;
+  saveData: string;
+  userId: string;
 }
 
 export function CloudSaveDialog({
@@ -40,7 +32,7 @@ export function CloudSaveDialog({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [cloudSaves, setCloudSaves] = useState<CloudSave[]>([])
+  const [cloudSaves, setCloudSaves] = useState<SaveData[]>([])
 
   const handleLogin = async () => {
     try {

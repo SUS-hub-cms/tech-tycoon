@@ -14,6 +14,7 @@ import { CloudSavesList } from '@/components/cloud-saves-list'
 import Link from 'next/link'
 import { useToast } from "@/hooks/use-toast"
 import { ApiService } from '@/services/api-service'
+import Image from 'next/image'
 
 interface User {
   id: string;
@@ -188,10 +189,12 @@ export default function AccountManagement() {
                 className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center"
               >
                 {user.photoURL ? (
-                  <img 
+                  <Image 
                     src={user.photoURL} 
                     alt={user.displayName || 'User avatar'} 
-                    className="w-full h-full rounded-full object-cover"
+                    width={96}
+                    height={96}
+                    className="rounded-full object-cover"
                   />
                 ) : (
                   <User className="h-12 w-12 text-gray-900" />
