@@ -18,15 +18,17 @@ interface SaveData {
   userId: string;
 }
 
+interface CloudSaveDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLoadSave: (saveData: string) => void;
+}
+
 export function CloudSaveDialog({
   isOpen,
   onClose,
   onLoadSave,
-}: {
-  isOpen: boolean
-  onClose: () => void
-  onLoadSave: (saveData: any) => void
-}) {
+}: CloudSaveDialogProps) {
   const { user, login } = useAuth()
   const { toast } = useToast()
   const [email, setEmail] = useState("")
@@ -63,16 +65,26 @@ export function CloudSaveDialog({
   }
 
   const handleLoadSave = async (saveId: string) => {
+    if (!user) return
     try {
-      const saveData = await ApiService.loadFromCloud(saveId, user!.id) // Using user.id instead of token
-      onLoadSave(saveData)
-      onClose()
+      setIsLoading(true)
+      const saveData = await ApiService.loadSave(saveId, user.id)
+      if (saveData) {
+        onLoadSave(saveData.saveData)
+        onClose()
+        toast({
+          title: "Success",
+          description: "Save loaded successfully.",
+        })
+      }
     } catch (error) {
       toast({
-        title: "Load Failed",
+        title: "Error",
         description: "Failed to load save from cloud.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
